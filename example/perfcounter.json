@@ -1,0 +1,15 @@
+{
+    "debug": true,
+    "hostname": "",
+    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter",
+    "step": 20,
+    "bases":["runtime","debug"],
+    "push": {
+        "enabled": true,
+        "api": "http://127.0.0.1:6060/api/push"
+    },
+    "http": {
+        "enabled": true,
+        "listen": "0.0.0.0:2015"
+    }
+}
