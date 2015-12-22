@@ -11,6 +11,7 @@ A gauge metric is an instantaneous reading of a particular int64 value
 
 ##### 设置 
 + 接口: SetGaugeValue(name string, value int64)
++ Alias: Gauge(name string, value int64)
 + 参数: value - 记录的数值
 + 例子:
 
@@ -32,6 +33,7 @@ A gauge metric is an instantaneous reading of a particular float64 value
 
 ##### 设置 
 + 接口: SetGaugeFloat64Value(name string, value float64)
++ Alias: GaugeFloat64(name string, value float64)
 + 参数: value - 记录的数值
 + 例子:
 
@@ -54,6 +56,7 @@ An incrementing and decrementing gauge metric
 
 ##### 设置 
 + 接口: SetCounterCount(name string, count int64)
++ Alias: Counter(name string, count int64)
 + 参数: count - 记录该值的相对变化量
 + 例子:
 
@@ -82,6 +85,7 @@ A meter metric which measures mean throughput and one-, five-, and fifteen-minut
 
 ##### 设置 
 + 接口: SetMeterCount(name string, value int64)
++ Alias: Meter(name string, value int64)
 + 参数: value - 该事件发生的次数 	
 + 例子:
 
@@ -106,6 +110,15 @@ pvSum := GetMeterCount("pageView")
 ```go
 // pv发生次数的时间平均，单位CPS。计时起点，为goperfcounter完成初始化。
 pvRateMean := GetMeterRateMean("pageView")
+```
+
+##### 获取累计的平均值
++ 接口: GetMeterRateStep(name string) float64
++ 例子:
+
+```go
+// 一个MeterTicker内，pv发生次数的时间平均，单位CPS。MeterTicker周期为5s。
+pvRateStep := GetMeterRateStep("pageView")
 ```
 
 ##### 获取1min的滑动平均
@@ -142,6 +155,7 @@ A histogram measures the [statistical distribution](http://www.johndcook.com/sta
 
 ##### 设置 
 + 接口: SetHistogramCount(name string, count int64)
++ Alias: Histogram(name string, count int64)
 + 参数: count - 该记录当前采样点的取值
 + 例子:
 
@@ -202,6 +216,7 @@ A timer metric which aggregates timing durations and provides duration statistic
 
 ##### 设置 
 + 接口: SetTimerCount(name string, ms int64)
++ Alias: Timer(name string, ms int64)
 + 参数: ms - 记录该事件的持续时间，单位ms
 + 例子:
 

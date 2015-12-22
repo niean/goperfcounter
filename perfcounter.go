@@ -165,6 +165,16 @@ func GetMeterRateMean(name string) float64 {
 	return 0.0
 }
 
+func GetMeterRateStep(name string) float64 {
+	rr := gpMeter.Get(name)
+	if rr != nil {
+		if r, ok := rr.(metrics.Meter); ok {
+			return r.RateStep()
+		}
+	}
+	return 0.0
+}
+
 func GetMeterRate1(name string) float64 {
 	rr := gpMeter.Get(name)
 	if rr != nil {
