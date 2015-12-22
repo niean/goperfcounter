@@ -477,6 +477,24 @@ func GetTimerRate15(name string) float64 {
 	return 0.0
 }
 
+// self
+func selfGauge(name string, value int64) {
+	rr := gpSelf.Get(name)
+	if rr != nil {
+		if r, ok := rr.(metrics.Gauge); ok {
+			r.Update(value)
+		}
+		return
+	}
+
+	r := metrics.NewGauge()
+	r.Update(value)
+	if err := gpSelf.Register(name, r); isDuplicateMetricError(err) {
+		r := gpSelf.Get(name).(metrics.Gauge)
+		r.Update(value)
+	}
+}
+
 // internal
 func isDuplicateMetricError(err error) bool {
 	if err == nil {

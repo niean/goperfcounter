@@ -23,9 +23,18 @@ func pushToFalcon() {
 
 	for _ = range time.Tick(time.Duration(step) * time.Second) {
 		fms := falconMetrics()
+
+		start := time.Now()
 		err := push(fms, api, debug)
-		if err != nil && debug {
-			log.Printf("[perfcounter] send to %s error: %v", api, err)
+		selfGauge("pfc.push.ms", int64(time.Since(start)/time.Millisecond))
+
+		if err != nil {
+			if debug {
+				log.Printf("[perfcounter] send to %s error: %v", api, err)
+			}
+			selfGauge("pfc.push.cnt", int64(0)) // statistics
+		} else {
+			selfGauge("pfc.push.cnt", int64(len(fms))) // statistics
 		}
 	}
 }

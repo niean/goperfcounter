@@ -112,9 +112,9 @@ func formatConfig(c GlobalConfig) GlobalConfig {
 	if nc.Push.Enabled && nc.Push.Api == "" {
 		nc.Push = defaultPush
 	}
-	// if nc.Http.Enabled && nc.Http.Listen == "" {
-	// 	nc.Http = defaultHttp
-	// }
+	if len(nc.Bases) < 1 {
+		nc.Bases = defaultBases
+	}
 
 	return nc
 }

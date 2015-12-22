@@ -16,6 +16,7 @@ var (
 	gpTimer        = metrics.NewRegistry()
 	gpDebug        = metrics.NewRegistry()
 	gpRuntime      = metrics.NewRegistry()
+	gpSelf         = metrics.NewRegistry()
 	values         = make(map[string]metrics.Registry) //readonly,mappings of metrics
 )
 
@@ -28,6 +29,7 @@ func init() {
 	values["timer"] = gpTimer
 	values["debug"] = gpDebug
 	values["runtime"] = gpRuntime
+	values["self"] = gpSelf
 }
 
 //
