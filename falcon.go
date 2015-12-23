@@ -39,6 +39,17 @@ func pushToFalcon() {
 	}
 }
 
+func falconMetric(types []string) []*MetricValue {
+	fd := []*MetricValue{}
+	for _, ty := range types {
+		if r, ok := values[ty]; ok && r != nil {
+			data := _falconMetric(r)
+			fd = append(fd, data...)
+		}
+	}
+	return fd
+}
+
 func falconMetrics() []*MetricValue {
 	data := make([]*MetricValue, 0)
 	for _, r := range values {
@@ -46,13 +57,6 @@ func falconMetrics() []*MetricValue {
 		data = append(data, nd...)
 	}
 	return data
-}
-
-func falconMetric(ty string) []*MetricValue {
-	if r, ok := values[ty]; ok && r != nil {
-		return _falconMetric(r)
-	}
-	return []*MetricValue{}
 }
 
 // internal

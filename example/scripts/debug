@@ -11,23 +11,13 @@ cfg=./perfcounter.json
 httpport=`cat perfcounter.json | grep -A3 "\"http\":" | grep "\"listen\"" | cut -d\" -f4 | cut -d: -f2`
 httpprex="127.0.0.1:$httpport"
 
-## proc
-function proc(){
+## pfc
+function pfc(){
     args=$@
     for i in $@; do
         url="$url/$i"
     done
     echo $url
-    curl -s "$httpprex$url" | python -m json.tool
-}
-
-## http 
-function http(){
-    shift
-    args=$@
-    for i in $@; do
-        url="$url/$i"
-    done
     curl -s "$httpprex$url" | python -m json.tool
 }
 
@@ -39,13 +29,13 @@ function control(){
 action=$1
 case $action in
     "proc")
-        proc "pfc" $@
+        pfc "pfc" $@
         ;;
-    "http")
-        http $@
+    "pfc")
+        pfc $@
         ;;
     "")
-        proc "pfc" "proc" "counters"
+        pfc "pfc/proc/metrics/gauge,gaugefloat64,counter,meter,histogram,timer/json"
         ;;
     *)
         control $@

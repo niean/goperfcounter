@@ -33,10 +33,12 @@ func init() {
 }
 
 //
-func rawMetric(mtype string) map[string]interface{} {
+func rawMetric(types []string) map[string]interface{} {
 	data := make(map[string]interface{})
-	if v, ok := values[mtype]; ok {
-		data[mtype] = v.Values()
+	for _, mtype := range types {
+		if v, ok := values[mtype]; ok {
+			data[mtype] = v.Values()
+		}
 	}
 	return data
 }
@@ -46,6 +48,18 @@ func rawMetrics() map[string]interface{} {
 	for key, v := range values {
 		data[key] = v.Values()
 	}
+	return data
+}
+
+func rawSizes() map[string]int64 {
+	data := map[string]int64{}
+	all := int64(0)
+	for key, v := range values {
+		kv := v.Size()
+		all += kv
+		data[key] = kv
+	}
+	data["all"] = all
 	return data
 }
 
