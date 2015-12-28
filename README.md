@@ -1,4 +1,4 @@
-goperfcounter
+GoPerfcounter
 ==========
 
 goperfcounter用于golang应用的业务监控。goperfcounter需要和开源监控系统[Open-Falcon](http://book.open-falcon.com/zh/index.html)一起使用。
@@ -37,7 +37,7 @@ import (
 
 func foo() {
 	if err := bar(); err != nil {
-		pfc.Meter("bar.called.error", 1)
+		pfc.Meter("bar.called.error", int64(1))
 	}
 }
 
@@ -48,7 +48,7 @@ func bar() error {
 
 ```
 
-这个调用主要会产生7个Open-Falcon统计指标，如下。其中，`counterType `和`metric`由goperfcounter决定；`timestamp `和`value`是goperfcounter记录的监控数据；`endpoint`默认为服务器`Hostname()`，可以通过配置文件设置；`step`默认为60s，可以通过配置文件设置；`tags`中包含一个`name=bar.called.error`的标签(`bar.called.error`为用户自定义的统计器名称)，其他`tags`标签可以通过配置文件设置。
+这个调用主要会产生7个Open-Falcon统计指标，如下。其中，`timestamp `和`value`是监控数据的取值；`endpoint`默认为服务器`Hostname()`，可以通过配置文件设置；`step`默认为60s，可以通过配置文件设置；`tags`中包含一个`name=bar.called.error`的标签(`bar.called.error`为用户自定义的统计器名称)，其他`tags`标签可以通过配置文件设置；`counterType `和`metric`由goperfcounter决定。
 
 ```python
 {
@@ -118,27 +118,6 @@ func bar() error {
 ```
 
 
-
-另外，goperfcounter提供了一个完整的例子，代码见[这里](https://github.com/niean/goperfcounter/blob/master/example/main.go)。按照如下指令，运行这个例子。
-
-```bash
-# install
-cd $GOPATH/src/github.com/niean
-git clone https://github.com/niean/goperfcounter.git
-cd $GOPATH/src/github.com/niean/goperfcounter
-go get ./...
-
-# run
-cd $GOPATH/src/github.com/niean/goperfcounter/example/scripts
-./debug build && ./debug start
-
-# proc
-./debug proc metrics/json   # list all metrics in json 
-./debug proc metrics/falcon # list all metrics in falcon-model
-
-```
-
-
 配置
 ----
 默认情况下，goperfcounter不需要进行配置。如果用户需要定制goperfcounter的行为，可以通过配置文件来进行。配置文件需要满足以下的条件:
@@ -166,6 +145,23 @@ cd $GOPATH/src/github.com/niean/goperfcounter/example/scripts
 }
 
 ```
+
+
+
+API
+----
+
+几个常用接口，如下。这几个接口，可以实现大部分的业务监控需求。
+
+|接口名称|例子|使用场景|
+|:----|:----|:---|
+|Meter|`// 统计页面访问次数，每来一次请求，pv加1`<br/>`Meter("pageView", int64(1)) `|Meter用于***"只增"计数***。既可以用于累加求和、又可以用于计算变化率|
+|Gauge|`// 统计队列长度` <br/>`Gauge("queueSize", int64(len(myQueueList))) `|Gauge用于记录瞬时整数值。相应的，GaugeFloat64用于记录瞬时浮点值|
+|Counter|`// 统计服务器当前的连接数` <br/>`Counter("ConnectionNum", int64(-1)) `|Counter也用于统计计数。相比于Meter，Counter支持增加计数、也支持减少计数；Counter只能用于累加求和、不能用于计算变化率|
+
+更详细的API介绍，请移步到[这里](https://github.com/niean/goperfcounter/blob/master/doc/API.md)。
+
+
 
 数据上报
 ----
@@ -204,11 +200,11 @@ goperfcounter会将各种统计器的统计结果，定时发送到Open-Falcon�
 </tr>
 <tr>
   <td>meter.rate.falcon</td>
-  <td>最近一个上报周期内，事件发生的频率，单位CPS(该值由Open-Falcon计算，要求Meter做只增计数)</td>
+  <td>一个Open-Falcon上报周期内，事件发生的频率，单位CPS(一个Open-Falcon上报周期默认为60s；该值由Open-Falcon计算，要求Meter做只增计数)</td>
 </tr>
 <tr>
   <td>meter.rate.step</td>
-  <td>最近一个MeterTick内，事件发生的频率，单位CPS(MeterTick的周期为5s)</td>
+  <td>一个MeterTick内，事件发生的频率，单位CPS(MeterTick的周期为5s)</td>
 </tr>
 <tr>
   <td>meter.rate.1min</td>
@@ -270,11 +266,11 @@ goperfcounter会将各种统计器的统计结果，定时发送到Open-Falcon�
 </tr>
 <tr>
   <td>timer.rate.falcon</td>
-  <td>最近一个上报周期内，计时器被调用的频率，单位CPS(该值由Open-Falcon二次计算得出)</td>
+  <td>一个Open-Falcon上报周期内，事件发生的频率，单位CPS(一个Open-Falcon上报周期默认为60s；该值由Open-Falcon二次计算得出)</td>
 </tr>
 <tr>
   <td>timer.rate.step</td>
-  <td>最近一个TimerTick内，事件发生的频率，单位CPS(TimerTick周期为5s)</td>
+  <td>一个TimerTick内，事件发生的频率，单位CPS(TimerTick周期为5s)</td>
 </tr>
 <tr>
   <td>timer.rate.1min</td>
@@ -325,12 +321,6 @@ goperfcounter会将各种统计器的统计结果，定时发送到Open-Falcon�
   <td>耗时统计的采样数据的标准差</td>
 </tr>
 </table>
-
-
-API
-----
-
-请移步到[这里](https://github.com/niean/goperfcounter/blob/master/doc/API.md)
 
 
 Bench
