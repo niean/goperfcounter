@@ -70,9 +70,6 @@ func _falconMetric(r metrics.Registry) []*MetricValue {
 	data := make([]*MetricValue, 0)
 	r.Each(func(name string, i interface{}) {
 		switch metric := i.(type) {
-		case metrics.Gauge:
-			m := gaugeMetricValue(metric, name, endpoint, tags, step, ts)
-			data = append(data, m...)
 		case metrics.GaugeFloat64:
 			m := gaugeFloat64MetricValue(metric, name, endpoint, tags, step, ts)
 			data = append(data, m...)
@@ -87,52 +84,31 @@ func _falconMetric(r metrics.Registry) []*MetricValue {
 			h := metric.Snapshot()
 			ms := histogramMetricValue(h, name, endpoint, tags, step, ts)
 			data = append(data, ms...)
-		case metrics.Timer:
-			t := metric.Snapshot()
-			ms := timerMetricValue(t, name, endpoint, tags, step, ts)
-			data = append(data, ms...)
 		}
 	})
 
 	return data
 }
 
-func counterMetricValue(metric metrics.Counter, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
-	tags := getTags(metricName, oldtags)
-	c1 := newMetricValue(endpoint, "counter.sum.all", metric.Count(), step, GAUGE, tags, ts)
-	return []*MetricValue{c1}
-}
-
-func gaugeMetricValue(metric metrics.Gauge, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
-	tags := getTags(metricName, oldtags)
-	c := newMetricValue(endpoint, "gauge.value", metric.Value(), step, GAUGE, tags, ts)
-	return []*MetricValue{c}
-}
-
 func gaugeFloat64MetricValue(metric metrics.GaugeFloat64, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
 	tags := getTags(metricName, oldtags)
-	c := newMetricValue(endpoint, "gaugefloat64.value", metric.Value(), step, GAUGE, tags, ts)
+	c := newMetricValue(endpoint, "value", metric.Value(), step, GAUGE, tags, ts)
 	return []*MetricValue{c}
+}
+
+func counterMetricValue(metric metrics.Counter, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
+	tags := getTags(metricName, oldtags)
+	c1 := newMetricValue(endpoint, "sum", metric.Count(), step, GAUGE, tags, ts)
+	return []*MetricValue{c1}
 }
 
 func meterMetricValue(metric metrics.Meter, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
 	data := make([]*MetricValue, 0)
 	tags := getTags(metricName, oldtags)
 
-	c := newMetricValue(endpoint, "meter.rate.falcon", metric.Count(), step, COUNTER, tags, ts)
-	data = append(data, c)
-
-	values := make(map[string]interface{})
-	values["sum.all"] = metric.Count()
-	values["rate.1min"] = metric.Rate1()
-	values["rate.5min"] = metric.Rate5()
-	values["rate.15min"] = metric.Rate15()
-	values["rate.all"] = metric.RateMean()
-	values["rate.step"] = metric.RateStep()
-	for key, val := range values {
-		c := newMetricValue(endpoint, "meter."+key, val, step, GAUGE, tags, ts)
-		data = append(data, c)
-	}
+	c1 := newMetricValue(endpoint, "rate", metric.RateStep(), step, GAUGE, tags, ts)
+	c2 := newMetricValue(endpoint, "sum", metric.Count(), step, GAUGE, tags, ts)
+	data = append(data, c1, c2)
 
 	return data
 }
@@ -142,53 +118,15 @@ func histogramMetricValue(metric metrics.Histogram, metricName, endpoint, oldtag
 	tags := getTags(metricName, oldtags)
 
 	values := make(map[string]interface{})
-	ps := metric.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
+	ps := metric.Percentiles([]float64{0.75, 0.95, 0.99})
 	values["min"] = metric.Min()
 	values["max"] = metric.Max()
 	values["mean"] = metric.Mean()
-	values["stddev"] = metric.StdDev()
-	values["50th"] = ps[0]
-	values["75th"] = ps[1]
-	values["95th"] = ps[2]
-	values["99th"] = ps[3]
-	values["999th"] = ps[4]
+	values["75th"] = ps[0]
+	values["95th"] = ps[1]
+	values["99th"] = ps[2]
 	for key, val := range values {
-		c := newMetricValue(endpoint, "histogram."+key, val, step, GAUGE, tags, ts)
-		data = append(data, c)
-	}
-
-	return data
-}
-
-func timerMetricValue(metric metrics.Timer, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
-	data := make([]*MetricValue, 0)
-	tags := getTags(metricName, oldtags)
-
-	c := newMetricValue(endpoint, "timer.rate.falcon", metric.Count(), step, COUNTER, tags, ts)
-	data = append(data, c)
-
-	values := make(map[string]interface{})
-	// meter
-	values["sum.all"] = metric.Count()
-	values["rate.1min"] = metric.Rate1()
-	values["rate.1min"] = metric.Rate1()
-	values["rate.5min"] = metric.Rate5()
-	values["rate.15min"] = metric.Rate15()
-	values["rate.all"] = metric.RateMean()
-	values["rate.step"] = metric.RateStep()
-	// histogram
-	ps := metric.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
-	values["min"] = metric.Min()
-	values["max"] = metric.Max()
-	values["mean"] = metric.Mean()
-	values["stddev"] = metric.StdDev()
-	values["50th"] = ps[0]
-	values["75th"] = ps[1]
-	values["95th"] = ps[2]
-	values["99th"] = ps[3]
-	values["999th"] = ps[4]
-	for key, val := range values {
-		c := newMetricValue(endpoint, "timer."+key, val, step, GAUGE, tags, ts)
+		c := newMetricValue(endpoint, key, val, step, GAUGE, tags, ts)
 		data = append(data, c)
 	}
 

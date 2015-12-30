@@ -7,46 +7,34 @@ gopfercounter提供了6种类型的统计器，分比为Gauge、GaugeFloat64、C
 Gauge
 ----
 
-A gauge metric is an instantaneous reading of a particular int64 value
+A gauge metric is an instantaneous reading of a particular value
 
 ##### 设置 
-+ 接口: SetGaugeValue(name string, value int64)
-+ Alias: Gauge(name string, value int64)
++ 接口: Gauge(name string, value int64)
 + 参数: value - 记录的数值
 + 例子:
 
 ```go
-SetGaugeValue("queueSize", int64(1))
+Gauge("queueSize", int64(13))
 ```
-
-##### 获取
-+ 接口: GetGaugeValue(name string) int64
-+ 例子:
-
-```go
-qsize := GetCounterCount("queueSize")
-```
-
-GaugeFloat64
-----
-A gauge metric is an instantaneous reading of a particular float64 value
 
 ##### 设置 
-+ 接口: SetGaugeFloat64Value(name string, value float64)
++ 接口: SetGaugeValue(name string, value float64)
 + Alias: GaugeFloat64(name string, value float64)
 + 参数: value - 记录的数值
 + 例子:
 
 ```go
-SetGaugeFloat64Value("requestRate", float64(19.86))
+GaugeFloat64("requestRate", float64(13.14))
+SetGaugeValue("requestRate", float64(13.14))
 ```
 
 ##### 获取
-+ 接口: GetGaugeFloat64Value(name string) float64
++ 接口: GetGaugeValue(name string) float64
 + 例子:
 
 ```go
-rRate := GetGaugeFloat64Value("requestRate")
+reqRate := GetGaugeValue("requestRate")
 ```
 
 Counter
@@ -103,22 +91,22 @@ SetMeterCount("pageView", int64(1))
 pvSum := GetMeterCount("pageView")
 ```
 
+##### 获取变化率
++ 接口: GetMeterRate(name string) float64
++ 例子:
+
+```go
+// pv发生次数的时间平均，单位CPS。计时范围为，本接口两次调用的时间差。
+pvRateMean := GetMeterRate("pageView")
+```
+
 ##### 获取累计的平均值
 + 接口: GetMeterRateMean(name string) float64
 + 例子:
 
 ```go
-// pv发生次数的时间平均，单位CPS。计时起点，为goperfcounter完成初始化。
+// pv发生次数的时间平均，单位CPS。计时范围为，goperfcounter完成初始，至当前时刻。
 pvRateMean := GetMeterRateMean("pageView")
-```
-
-##### 获取累计的平均值
-+ 接口: GetMeterRateStep(name string) float64
-+ 例子:
-
-```go
-// 一个MeterTicker内，pv发生次数的时间平均，单位CPS。MeterTicker周期为5s。
-pvRateStep := GetMeterRateStep("pageView")
 ```
 
 ##### 获取1min的滑动平均
@@ -164,13 +152,28 @@ A histogram measures the [statistical distribution](http://www.johndcook.com/sta
 SetHistogramCount("processNum", int64(325))
 ```
 
-##### 获取中值 50thPecentile
-+ 接口: GetHistogram50th(name string) float64
+##### 获取最大值
++ 接口: GetHistogramMax(name string) int64
 + 例子:
 
 ```go
-// 获取并发度的中位数
-pNum50th := GetHistogram50th("processNum")
+max := GetHistogramMax("processNum")
+```
+
+##### 获取最小值
++ 接口: GetHistogramMin(name string) int64
++ 例子:
+
+```go
+min := GetHistogramMin("processNum")
+```
+
+##### 获取平均值
++ 接口: GetHistogramMean(name string) float64
++ 例子:
+
+```go
+mean := GetHistogramMean("processNum")
 ```
 
 ##### 获取75thPecentile
@@ -198,54 +201,5 @@ pNum95th := GetHistogram95th("processNum")
 ```go
 // 获取所有采样数据中，处于99%的并发度
 pNum99th := GetHistogram99th("processNum")
-```
-
-##### 获取999thPecentile
-+ 接口: GetHistogram999th(name string) float64
-+ 例子:
-
-```go
-// 获取所有采样数据中，处于99.9%的并发度
-pNum999th := GetHistogram999th("processNum")
-```
-
-Timer
-----
-
-A timer metric which aggregates timing durations and provides duration statistics, plus throughput statistics via [Meter](###Meter)
-
-##### 设置 
-+ 接口: SetTimerCount(name string, ms int64)
-+ Alias: Timer(name string, ms int64)
-+ 参数: ms - 记录该事件的持续时间，单位ms
-+ 例子:
-
-```go
-// 调用getUserId方法执行的时间, 20ms.
-SetTimerCount("timeOfGetUserId", 20)
-```
-
-##### 获取平均值
-+ 接口: GetTimerMean(name string) float64
-+ 例子:
-
-```go
-mean := GetTimerMean("timeOfGetUserId")
-```
-
-##### 获取最大值
-+ 接口: GetTimerMax(name string) int64
-+ 例子:
-
-```go
-max := GetTimerMax("timeOfGetUserId")
-```
-
-##### 获取最小值
-+ 接口: GetTimerMin(name string) int64
-+ 例子:
-
-```go
-min := GetTimerMin("timeOfGetUserId")
 ```
 

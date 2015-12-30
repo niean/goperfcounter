@@ -48,71 +48,26 @@ func bar() error {
 
 ```
 
-这个调用主要会产生7个Open-Falcon统计指标，如下。其中，`timestamp `和`value`是监控数据的取值；`endpoint`默认为服务器`Hostname()`，可以通过配置文件设置；`step`默认为60s，可以通过配置文件设置；`tags`中包含一个`name=bar.called.error`的标签(`bar.called.error`为用户自定义的统计器名称)，其他`tags`标签可以通过配置文件设置；`counterType `和`metric`由goperfcounter决定。
+这个调用主要会产生2个Open-Falcon统计指标，如下。其中，`timestamp `和`value`是监控数据的取值；`endpoint`默认为服务器`Hostname()`，可以通过配置文件设置；`step`默认为60s，可以通过配置文件设置；`tags`中包含一个`name=bar.called.error`的标签(`bar.called.error`为用户自定义的统计器名称)，其他`tags`标签可以通过配置文件设置；`counterType `和`metric`由goperfcounter决定。
 
 ```python
 {
-    "counterType": "COUNTER", //Open-Falcon会对COUNTER类型的数据，做一阶时间导数
+    "counterType": "GAUGE",
     "endpoint": "git",
-    "metric": "meter.rate.falcon",
+    "metric": "rate",
     "step": 20,
-    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter,name=bar.called.error",
-    "timestamp": 1450681584,
-    "value": 83
-},
-{
-    "counterType": "GAUGE",//Open-Falcon直接记录GAUGE类型的数据、不做二次计算
-    "endpoint": "git",
-    "metric": "meter.sum.all",
-    "step": 20,
-    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter,name=bar.called.error",
-    "timestamp": 1450681584,
-    "value": 83
+    "tags": "module=perfcounter,name=bar.called.error",
+    "timestamp": 1451397266,
+    "value": 13.14
 },
 {
     "counterType": "GAUGE",
     "endpoint": "git",
-    "metric": "meter.rate.1min",
+    "metric": "sum",
     "step": 20,
-    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter,name=bar.called.error",
-    "timestamp": 1450681584,
-    "value": 0
-},
-{
-    "counterType": "GAUGE",
-    "endpoint": "git",
-    "metric": "meter.rate.5min",
-    "step": 20,
-    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter,name=bar.called.error",
-    "timestamp": 1450681584,
-    "value": 0
-},
-{
-    "counterType": "GAUGE",
-    "endpoint": "git",
-    "metric": "meter.rate.15min",
-    "step": 20,
-    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter,name=bar.called.error",
-    "timestamp": 1450681584,
-    "value": 0
-},
-{
-    "counterType": "GAUGE",
-    "endpoint": "git",
-    "metric": "meter.rate.all",
-    "step": 20,
-    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter,name=bar.called.error",
-    "timestamp": 1450681584,
-    "value": 0.02578528
-},
-{
-    "counterType": "GAUGE",
-    "endpoint": "git",
-    "metric": "meter.rate.step",
-    "step": 20,
-    "tags": "cop=xiaomi,owt=inf,pdl=falcon,module=perfcounter,name=bar.called.error",
-    "timestamp": 1450681584,
-    "value": 0.5
+    "tags": "module=perfcounter,name=bar.called.error",
+    "timestamp": 1451397266,
+    "value": 1023
 }
 
 ```
@@ -155,8 +110,8 @@ API
 
 |接口名称|例子|使用场景|
 |:----|:----|:---|
-|Meter|`// 统计页面访问次数，每来一次请求，pv加1`<br/>`Meter("pageView", int64(1)) `|Meter用于***"只增"计数***。既可以用于累加求和、又可以用于计算变化率|
-|Gauge|`// 统计队列长度` <br/>`Gauge("queueSize", int64(len(myQueueList))) `|Gauge用于记录瞬时整数值。相应的，GaugeFloat64用于记录瞬时浮点值|
+|Meter|`// 统计页面访问次数，每来一次请求，pv加1`<br/>`Meter("pageView", int64(1)) `|Meter用于***"只增"计数***。输出累加求和 及 变化率|
+|Gauge|`// 统计队列长度` <br/>`Gauge("queueSize", int64(len(myQueueList))) ` <br/> `GaugeFloat64("queueSize", float64(len(myQueueList)))`|Gauge用于记录瞬时值。支持int64、float64类型。|
 |Counter|`// 统计服务器当前的连接数` <br/>`Counter("ConnectionNum", int64(-1)) `|Counter也用于统计计数。相比于Meter，Counter支持增加计数、也支持减少计数；Counter只能用于累加求和、不能用于计算变化率|
 
 更详细的API介绍，请移步到[这里](https://github.com/niean/goperfcounter/blob/master/doc/API.md)。
@@ -176,149 +131,47 @@ goperfcounter会将各种统计器的统计结果，定时发送到Open-Falcon�
 </tr>
 <tr>
   <th rowspan="1">Counter</th>
-  <td>counter.sum.all</td>
+  <td>sum</td>
   <td>所有统计计数的累加和</td>
 </tr>
 <tr>
   <th rowspan="1">Gauge</th>
-  <td>gauge.value</td>
-  <td>最后一次的记录值(int64)</td>
-</tr>
-<tr>
-  <th rowspan="1">GaugeFloat64</th>
-  <td>gaugefloat64.value</td>
+  <td>value</td>
   <td>最后一次的记录值(float64)</td>
 </tr>
 <tr>
-  <th rowspan="7">Meter</th>
-  <td>meter.sum.all</td>
-  <td>事件发生的总次数(即，所有统计计数的累加和)</td>
+  <th rowspan="2">Meter</th>
+  <td>sum</td>
+  <td>事件发生的总次数(即，所有计数的累加和)</td>
 </tr>
 <tr>
-  <td>meter.rate.all</td>
-  <td>事件发生的频率，单位CPS</td>
+  <td>rate</td>
+  <td>一个Open-Falcon上报周期(默认60s)内，事件发生的频率，单位CPS。要求Meter做"只增"计数。</td>
 </tr>
 <tr>
-  <td>meter.rate.falcon</td>
-  <td>一个Open-Falcon上报周期内，事件发生的频率，单位CPS(一个Open-Falcon上报周期默认为60s；该值由Open-Falcon计算，要求Meter做只增计数)</td>
-</tr>
-<tr>
-  <td>meter.rate.step</td>
-  <td>一个MeterTick内，事件发生的频率，单位CPS(MeterTick的周期为5s)</td>
-</tr>
-<tr>
-  <td>meter.rate.1min</td>
-  <td>事件发生频率的1min滑动平均，单位CPS</td>
-</tr>
-<tr>
-  <td>meter.rate.5min</td>
-  <td>事件发生频率的5min滑动平均，单位CPS</td>
-</tr>
-<tr>
-  <td>meter.rate.15min</td>
-  <td>事件发生频率的15min滑动平均，单位CPS</td>
-</tr>
-<tr>
-  <th rowspan="9">Histogram</th>
-  <td>histogram.50th</td>
-  <td>所有采样数据中，处于中位50%处的数值</td>
-</tr>
-<tr>
-  <td>histogram.75th</td>
-  <td>所有采样数据中，处于75%处的数值</td>
-</tr>
-<tr>
-  <td>histogram.95th</td>
-  <td>所有采样数据中，处于95%处的数值</td>
-</tr>
-<tr>
-  <td>histogram.99th</td>
-  <td>所有采样数据中，处于99%处的数值</td>
-</tr>
-<tr>
-  <td>histogram.999th</td>
-  <td>所有采样数据中，处于99.9%处的数值</td>
-</tr>
-<tr>
-  <td>histogram.max</td>
+  <th rowspan="6">Histogram</th>
+  <td>max</td>
   <td>采样数据的最大值</td>
 </tr>
 <tr>
-  <td>histogram.min</td>
+  <td>min</td>
   <td>采样数据的最小值</td>
 </tr>
 <tr>
-  <td>histogram.mean</td>
+  <td>mean</td>
   <td>采样数据的平均值</td>
 </tr>
 <tr>
-  <td>histogram.stddev</td>
-  <td>采样数据的标准差</td>
+  <td>75th</td>
+  <td>所有采样数据中，处于75%处的数值</td>
 </tr>
 <tr>
-  <th rowspan="16">Timer</th>
-  <td>timer.sum.all</td>
-  <td>计时器被调用的总次数</td>
+  <td>95th</td>
+  <td>所有采样数据中，处于95%处的数值</td>
 </tr>
 <tr>
-  <td>timer.rate.all</td>
-  <td>计时器被调用的频率，单位CPS</td>
-</tr>
-<tr>
-  <td>timer.rate.falcon</td>
-  <td>一个Open-Falcon上报周期内，事件发生的频率，单位CPS(一个Open-Falcon上报周期默认为60s；该值由Open-Falcon二次计算得出)</td>
-</tr>
-<tr>
-  <td>timer.rate.step</td>
-  <td>一个TimerTick内，事件发生的频率，单位CPS(TimerTick周期为5s)</td>
-</tr>
-<tr>
-  <td>timer.rate.1min</td>
-  <td>计时器被调用频率的1min滑动平均，单位CPS</td>
-</tr>
-<tr>
-  <td>timer.rate.5min</td>
-  <td>计时器被调用频率的5min滑动平均，单位CPS</td>
-</tr>
-<tr>
-  <td>timer.rate.15min</td>
-  <td>计时器被调用频率的15min滑动平均，单位CPS</td>
-</tr>
-<tr>
-  <td>timer.50th</td>
-  <td>所有耗时统计的采样数据中，处于中位50%处的数值</td>
-</tr>
-<tr>
-  <td>timer.75th</td>
-  <td>所有耗时统计的采样数据中，处于75%处的数值</td>
-</tr>
-<tr>
-  <td>timer.95th</td>
-  <td>所有耗时统计的采样数据中，处于95%处的数值</td>
-</tr>
-<tr>
-  <td>timer.99th</td>
-  <td>所有耗时统计的采样数据中，处于99%处的数值</td>
-</tr>
-<tr>
-  <td>timer.999th</td>
-  <td>所有耗时统计的采样数据中，处于99.9%处的数值</td>
-</tr>
-<tr>
-  <td>timer.max</td>
-  <td>耗时统计的采样数据的最大值</td>
-</tr>
-<tr>
-  <td>timer.min</td>
-  <td>耗时统计的采样数据的最小值</td>
-</tr>
-<tr>
-  <td>timer.mean</td>
-  <td>耗时统计的采样数据的平均值</td>
-</tr>
-<tr>
-  <td>timer.stddev</td>
-  <td>耗时统计的采样数据的标准差</td>
+  <td>99th</td>
+  <td>所有采样数据中，处于99%处的数值</td>
 </tr>
 </table>
 

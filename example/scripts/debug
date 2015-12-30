@@ -35,7 +35,7 @@ case $action in
         pfc $@
         ;;
     "")
-        pfc "pfc/proc/metrics/gauge,gaugefloat64,counter,meter,histogram,timer/json"
+        pfc "pfc/proc/metrics/gauge,counter,meter,histogram/json"
         ;;
     *)
         control $@

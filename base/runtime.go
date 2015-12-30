@@ -41,7 +41,7 @@ var (
 		}
 		NumCgoCall   metrics.Gauge
 		NumGoroutine metrics.Gauge
-		ReadMemStats metrics.Timer
+		ReadMemStats metrics.Histogram
 	}
 	frees       uint64
 	lookups     uint64
@@ -74,7 +74,7 @@ func captureRuntimeMemStats(r metrics.Registry, d time.Duration) {
 func captureRuntimeMemStatsOnce(r metrics.Registry) {
 	t := time.Now()
 	runtime.ReadMemStats(&memStats) // This takes 50-200us.
-	runtimeMetrics.ReadMemStats.UpdateSince(t)
+	runtimeMetrics.ReadMemStats.Update(int64(time.Since(t)))
 
 	runtimeMetrics.MemStats.Alloc.Update(int64(memStats.Alloc))
 	runtimeMetrics.MemStats.BuckHashSys.Update(int64(memStats.BuckHashSys))
@@ -176,7 +176,7 @@ func registerRuntimeMemStats(r metrics.Registry) {
 	runtimeMetrics.MemStats.TotalAlloc = metrics.NewGauge()
 	runtimeMetrics.NumCgoCall = metrics.NewGauge()
 	runtimeMetrics.NumGoroutine = metrics.NewGauge()
-	runtimeMetrics.ReadMemStats = metrics.NewTimer()
+	runtimeMetrics.ReadMemStats = metrics.NewHistogram(metrics.NewExpDecaySample(1028, 0.015))
 
 	r.Register("runtime.MemStats.Alloc", runtimeMetrics.MemStats.Alloc)
 	r.Register("runtime.MemStats.BuckHashSys", runtimeMetrics.MemStats.BuckHashSys)

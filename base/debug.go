@@ -15,7 +15,7 @@ var (
 			Pause      metrics.Histogram
 			PauseTotal metrics.Gauge
 		}
-		ReadGCStats metrics.Timer
+		ReadGCStats metrics.Histogram
 	}
 	gcStats = debug.GCStats{Pause: make([]time.Duration, 11)}
 )
@@ -45,7 +45,7 @@ func captureDebugGCStatsOnce(r metrics.Registry) {
 	lastGC := gcStats.LastGC
 	t := time.Now()
 	debug.ReadGCStats(&gcStats)
-	debugMetrics.ReadGCStats.UpdateSince(t)
+	debugMetrics.ReadGCStats.Update(int64(time.Since(t)))
 
 	debugMetrics.GCStats.LastGC.Update(int64(gcStats.LastGC.UnixNano()))
 	debugMetrics.GCStats.NumGC.Update(int64(gcStats.NumGC))
@@ -64,7 +64,7 @@ func registerDebugGCStats(r metrics.Registry) {
 	debugMetrics.GCStats.NumGC = metrics.NewGauge()
 	debugMetrics.GCStats.Pause = metrics.NewHistogram(metrics.NewExpDecaySample(1028, 0.015))
 	debugMetrics.GCStats.PauseTotal = metrics.NewGauge()
-	debugMetrics.ReadGCStats = metrics.NewTimer()
+	debugMetrics.ReadGCStats = metrics.NewHistogram(metrics.NewExpDecaySample(1028, 0.015))
 
 	r.Register("debug.GCStats.LastGC", debugMetrics.GCStats.LastGC)
 	r.Register("debug.GCStats.NumGC", debugMetrics.GCStats.NumGC)
