@@ -70,6 +70,9 @@ func _falconMetric(r metrics.Registry) []*MetricValue {
 	data := make([]*MetricValue, 0)
 	r.Each(func(name string, i interface{}) {
 		switch metric := i.(type) {
+		case metrics.Gauge:
+			m := gaugeMetricValue(metric, name, endpoint, tags, step, ts)
+			data = append(data, m...)
 		case metrics.GaugeFloat64:
 			m := gaugeFloat64MetricValue(metric, name, endpoint, tags, step, ts)
 			data = append(data, m...)
@@ -88,6 +91,12 @@ func _falconMetric(r metrics.Registry) []*MetricValue {
 	})
 
 	return data
+}
+
+func gaugeMetricValue(metric metrics.Gauge, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
+	tags := getTags(metricName, oldtags)
+	c := newMetricValue(endpoint, "value", metric.Value(), step, GAUGE, tags, ts)
+	return []*MetricValue{c}
 }
 
 func gaugeFloat64MetricValue(metric metrics.GaugeFloat64, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
@@ -154,17 +163,17 @@ func getTags(name string, tags string) string {
 
 //
 func push(data []*MetricValue, url string, debug bool) error {
-	len := len(data)
+	dlen := len(data)
 	pkg := 200 //send pkg items once
 	sent := 0
 	for {
-		if sent >= len {
+		if sent >= dlen {
 			break
 		}
 
 		end := sent + pkg
-		if end > len {
-			end = len
+		if end > dlen {
+			end = dlen
 		}
 
 		pkgData := data[sent:end]

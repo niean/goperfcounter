@@ -1,7 +1,7 @@
 API
 ====
 
-gopfercounter提供了6种类型的统计器，分比为Gauge、GaugeFloat64、Counter、Meter、Histogram、Timer。统计器的含义，参见[java-metrics](http://metrics.dropwizard.io/3.1.0/getting-started/)。
+gopfercounter提供了4种类型的统计器，分比为Gauge、Counter、Meter、Histogram。统计器的含义，参见[java-metrics](http://metrics.dropwizard.io/3.1.0/getting-started/)。
 
 
 Gauge
@@ -91,13 +91,13 @@ SetMeterCount("pageView", int64(1))
 pvSum := GetMeterCount("pageView")
 ```
 
-##### 获取变化率
-+ 接口: GetMeterRate(name string) float64
+##### 获取一个上报周期内的变化率
++ 接口: GetMeterRateStep(name string) float64
 + 例子:
 
 ```go
-// pv发生次数的时间平均，单位CPS。计时范围为，本接口两次调用的时间差。
-pvRateMean := GetMeterRate("pageView")
+// pv发生次数的时间平均，单位CPS。计时范围为，本接口两次调用的时间差，即一个上报周期。
+pvRateStep := GetMeterRateStep("pageView")
 ```
 
 ##### 获取累计的平均值
