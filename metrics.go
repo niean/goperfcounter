@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	gpCounter      = metrics.NewRegistry()
 	gpGaugeFloat64 = metrics.NewRegistry()
+	gpCounter      = metrics.NewRegistry()
 	gpMeter        = metrics.NewRegistry()
 	gpHistogram    = metrics.NewRegistry()
 	gpDebug        = metrics.NewRegistry()
@@ -19,8 +19,8 @@ var (
 )
 
 func init() {
-	values["counter"] = gpCounter
 	values["gauge"] = gpGaugeFloat64
+	values["counter"] = gpCounter
 	values["meter"] = gpMeter
 	values["histogram"] = gpHistogram
 	values["debug"] = gpDebug

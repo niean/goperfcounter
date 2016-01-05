@@ -30,38 +30,6 @@ func init() {
 	}
 }
 
-// counter
-func Counter(name string, count int64) {
-	SetCounterCount(name, count)
-}
-
-func SetCounterCount(name string, count int64) {
-	rr := gpCounter.Get(name)
-	if rr != nil {
-		if r, ok := rr.(metrics.Counter); ok {
-			r.Inc(count)
-		}
-		return
-	}
-
-	r := metrics.NewCounter()
-	r.Inc(count)
-	if err := gpCounter.Register(name, r); isDuplicateMetricError(err) {
-		r := gpCounter.Get(name).(metrics.Counter)
-		r.Inc(count)
-	}
-}
-
-func GetCounterCount(name string) int64 {
-	rr := gpCounter.Get(name)
-	if rr != nil {
-		if r, ok := rr.(metrics.Counter); ok {
-			return r.Count()
-		}
-	}
-	return 0
-}
-
 // gauge
 func Gauge(name string, value int64) {
 	SetGaugeValue(name, float64(value))
@@ -302,6 +270,37 @@ func GetHistogram999th(name string) float64 {
 	return 0.0
 }
 
+// senior
+func Counter(name string, count int64) {
+	SetCounterCount(name, count)
+}
+func SetCounterCount(name string, count int64) {
+	rr := gpCounter.Get(name)
+	if rr != nil {
+		if r, ok := rr.(metrics.Counter); ok {
+			r.Inc(count)
+		}
+		return
+	}
+
+	r := metrics.NewCounter()
+	r.Inc(count)
+	if err := gpCounter.Register(name, r); isDuplicateMetricError(err) {
+		r := gpCounter.Get(name).(metrics.Counter)
+		r.Inc(count)
+	}
+}
+
+func GetCounterCount(name string) int64 {
+	rr := gpCounter.Get(name)
+	if rr != nil {
+		if r, ok := rr.(metrics.Counter); ok {
+			return r.Count()
+		}
+	}
+	return 0
+}
+
 // self
 func selfGauge(name string, value int64) {
 	rr := gpSelf.Get(name)
@@ -317,6 +316,23 @@ func selfGauge(name string, value int64) {
 	if err := gpSelf.Register(name, r); isDuplicateMetricError(err) {
 		r := gpSelf.Get(name).(metrics.Gauge)
 		r.Update(value)
+	}
+}
+
+func selfMeter(name string, value int64) {
+	rr := gpSelf.Get(name)
+	if rr != nil {
+		if r, ok := rr.(metrics.Meter); ok {
+			r.Mark(value)
+		}
+		return
+	}
+
+	r := metrics.NewMeter()
+	r.Mark(value)
+	if err := gpSelf.Register(name, r); isDuplicateMetricError(err) {
+		r := gpSelf.Get(name).(metrics.Meter)
+		r.Mark(value)
 	}
 }
 

@@ -15,9 +15,10 @@ func main() {
 
 func basic() {
 	for _ = range time.Tick(time.Second * time.Duration(10)) {
-		// (常用) Meter,用于累加求和、计算变化率。Meter只能增加计数、不能减少计数，使用场景如，统计首页访问次数、gvm的CG次数等。
+		// (常用) Meter,用于累加求和、计算变化率。使用场景如，统计首页访问次数、gvm的CG次数等。
 		pv := int64(rand.Int() % 100)
-		pfc.Meter("bar.called.error", pv)
+		pfc.Meter("test.meter", pv)
+		pfc.Meter("test.meter.2", pv-50)
 
 		// (常用) Gauge,用于保存数值类型的瞬时记录值。使用场景如，统计队列长度、统计CPU使用率等
 		queueSize := int64(rand.Int()%100 - 50)
@@ -25,10 +26,6 @@ func basic() {
 
 		cpuUtil := float64(rand.Int()%10000) / float64(100)
 		pfc.GaugeFloat64("test.gauge.float64", cpuUtil)
-
-		// Counter,用于累加求和。Counter可以增加计数，也可以减少计数，使用场景如，统计已登录用户数
-		users := int64(rand.Int()%100 - 50)
-		pfc.Counter("test.counter", users)
 	}
 }
 

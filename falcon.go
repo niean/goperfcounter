@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	GAUGE   = "GAUGE"
-	COUNTER = "COUNTER"
+	GAUGE = "GAUGE"
 )
 
 func pushToFalcon() {
@@ -22,8 +21,9 @@ func pushToFalcon() {
 	debug := cfg.Debug
 
 	for _ = range time.Tick(time.Duration(step) * time.Second) {
-		fms := falconMetrics()
+		selfMeter("pfc.push.cnt", 1)
 
+		fms := falconMetrics()
 		start := time.Now()
 		err := push(fms, api, debug)
 		selfGauge("pfc.push.ms", int64(time.Since(start)/time.Millisecond))
@@ -32,9 +32,9 @@ func pushToFalcon() {
 			if debug {
 				log.Printf("[perfcounter] send to %s error: %v", api, err)
 			}
-			selfGauge("pfc.push.cnt", int64(0)) // statistics
+			selfGauge("pfc.push.size", int64(0)) // statistics
 		} else {
-			selfGauge("pfc.push.cnt", int64(len(fms))) // statistics
+			selfGauge("pfc.push.size", int64(len(fms))) // statistics
 		}
 	}
 }
@@ -107,7 +107,7 @@ func gaugeFloat64MetricValue(metric metrics.GaugeFloat64, metricName, endpoint, 
 
 func counterMetricValue(metric metrics.Counter, metricName, endpoint, oldtags string, step, ts int64) []*MetricValue {
 	tags := getTags(metricName, oldtags)
-	c1 := newMetricValue(endpoint, "sum", metric.Count(), step, GAUGE, tags, ts)
+	c1 := newMetricValue(endpoint, "count", metric.Count(), step, GAUGE, tags, ts)
 	return []*MetricValue{c1}
 }
 

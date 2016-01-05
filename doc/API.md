@@ -1,7 +1,7 @@
 API
 ====
 
-gopfercounter提供了4种类型的统计器，分比为Gauge、Counter、Meter、Histogram。统计器的含义，参见[java-metrics](http://metrics.dropwizard.io/3.1.0/getting-started/)。
+gopfercounter提供了几种类型的统计器，分比为Gauge、Meter、Histogram。统计器的含义，参见[java-metrics](http://metrics.dropwizard.io/3.1.0/getting-started/)。
 
 
 Gauge
@@ -35,33 +35,6 @@ SetGaugeValue("requestRate", float64(13.14))
 
 ```go
 reqRate := GetGaugeValue("requestRate")
-```
-
-Counter
-----
-
-An incrementing and decrementing gauge metric
-
-##### 设置 
-+ 接口: SetCounterCount(name string, count int64)
-+ Alias: Counter(name string, count int64)
-+ 参数: count - 记录该值的相对变化量
-+ 例子:
-
-```go
-// 新增一条链接
-SetCounterCount("ConnectionNum", int64(1))
-// 断开一条链接
-SetCounterCount("ConnectionNum", int64(-1))
-```
-
-##### 获取累计的值
-+ 接口: GetCounterCount(name string) int64
-+ 例子:
-
-```go
-// 获取当前链接数
-cNum := GetCounterCount("ConnectionNum")
 ```
 
 Meter
@@ -139,7 +112,7 @@ pvRate15Min := GetMeterRate15("pageView")
 Histogram
 ----
 
-A histogram measures the [statistical distribution](http://www.johndcook.com/standard_deviation.html) of values in a stream of data. In addition to minimum, maximum, mean, etc., it also measures median, 75th, 90th, 95th, 98th, 99th, and 99.9th percentiles
+A histogram measures the [statistical distribution](http://www.johndcook.com/standard_deviation.html) of values in a stream of data. In addition to minimum, maximum, mean, etc., it also measures median, 75th, 90th, 95th, 98th, and 99th percentiles
 
 ##### 设置 
 + 接口: SetHistogramCount(name string, count int64)

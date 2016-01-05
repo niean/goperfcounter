@@ -14,14 +14,12 @@ Result
 
 ```
 PASS
-BenchmarkMeter   2000000           892 ns/op
-BenchmarkMeterMulti  2000000           873 ns/op
-BenchmarkGauge   5000000           338 ns/op
-BenchmarkGaugeMulti  5000000           350 ns/op
-BenchmarkCounter    10000000           186 ns/op
-BenchmarkCounterMulti   10000000           178 ns/op
-BenchmarkHistogram   2000000           758 ns/op
-BenchmarkHistogramMulti  2000000           751 ns/op
-ok      github.com/niean/goperfcounter  18.383s
+BenchmarkMeter   2000000           918 ns/op
+BenchmarkMeterMulti  2000000           916 ns/op
+BenchmarkGauge   5000000           342 ns/op
+BenchmarkGaugeMulti  5000000           333 ns/op
+BenchmarkHistogram   2000000           800 ns/op
+BenchmarkHistogramMulti  2000000           780 ns/op
+ok      github.com/niean/goperfcounter  14.568s
 
 ```
