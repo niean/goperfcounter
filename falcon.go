@@ -20,13 +20,16 @@ func pushToFalcon() {
 	api := cfg.Push.Api
 	debug := cfg.Debug
 
+	// align push start ts
+	alignPushStartTs(step)
+
 	for _ = range time.Tick(time.Duration(step) * time.Second) {
-		selfMeter("pfc.push.cnt", 1)
+		selfMeter("pfc.push.cnt", 1) // statistics
 
 		fms := falconMetrics()
 		start := time.Now()
 		err := push(fms, api, debug)
-		selfGauge("pfc.push.ms", int64(time.Since(start)/time.Millisecond))
+		selfGauge("pfc.push.ms", int64(time.Since(start)/time.Millisecond)) // statistics
 
 		if err != nil {
 			if debug {
@@ -193,6 +196,16 @@ func push(data []*MetricValue, url string, debug bool) error {
 		}
 	}
 	return nil
+}
+
+//
+func alignPushStartTs(stepSec int64) {
+	nw := time.Duration(time.Now().UnixNano())
+	step := time.Duration(stepSec) * time.Second
+	sleepNano := step - nw%step
+	if sleepNano > 0 {
+		time.Sleep(sleepNano)
+	}
 }
 
 //

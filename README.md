@@ -84,18 +84,18 @@ func bar() error {
 
 ```go
 {
-    "debug": true, // 是否开启调制，默认为false
+    "debug": false, // 是否开启调制，默认为false
     "hostname": "", // 机器名(也即endpoint名称)，默认为本机名称
-    "tags": "cop=xiaomi,module=perfcounter", // tags标签，默认为空。一个tag形如"key=val"，多个tag用逗号分隔；name为保留字段，因此不允许设置形如"name=xxx"的tag
+    "tags": "", // tags标签，默认为空。一个tag形如"key=val"，多个tag用逗号分隔；name为保留字段，因此不允许设置形如"name=xxx"的tag。eg. "cop=xiaomi,module=perfcounter"
     "step": 60, // 上报周期，单位s，默认为60s
     "bases":[], // gvm基础信息采集，可选值为"debug"、"runtime"，默认不采集
     "push": { // push数据到Open-Falcon
         "enabled":true, // 是否开启自动push，默认开启
-        "api": "http:// 127.0.0.1:6060/api/push" // Open-Falcon接收器地址，默认为本地agent，即"http:// 127.0.0.1:1988/v1/push"
+        "api": "" // Open-Falcon接收器地址，默认为本地agent，即"http:// 127.0.0.1:1988/v1/push"
     },
     "http": { // http服务，为了安全考虑，当前只允许本地访问
-        "enabled": true, // 是否开启http服务，默认不开启
-        "listen": "0.0.0.0:2015" // http服务监听地址，默认为空
+        "enabled": false, // 是否开启http服务，默认不开启
+        "listen": "" // http服务监听地址，默认为空。eg. "0.0.0.0:2015"表示在2015端口开启http监听
     }
 }
 
