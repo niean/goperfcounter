@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -28,7 +29,8 @@ type PushConfig struct {
 }
 
 var (
-	configFn     = "./perfcounter.json"
+	configFile   = "perfcounter.json"
+	configFn     = "./" + configFile
 	defaultTags  = ""
 	defaultStep  = int64(60) //time in sec
 	defaultBases = []string{}
@@ -50,9 +52,15 @@ func config() *GlobalConfig {
 
 func loadConfig() error {
 	if !isFileExist(configFn) {
-		return fmt.Errorf("config file not found: %s", configFn)
+		execPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			return fmt.Errorf("get exec path err: %s", err.Error())
+		}
+		configFn = filepath.Join(execPath, configFile)
+		if !isFileExist(configFn) {
+			return fmt.Errorf("config file not found: %s", configFn)
+		}
 	}
-
 	c, err := parseConfig(configFn)
 	if err != nil {
 		return err
